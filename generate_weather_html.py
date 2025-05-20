@@ -1,6 +1,6 @@
 import requests
 import os
-from datetime import datetime
+from datetime import datetime, timedelta
 
 API_KEY = os.getenv('OWM_API_KEY')
 CITIES = [
@@ -9,25 +9,79 @@ CITIES = [
     {"name": "Chicago", "q": "Chicago,us"}
 ]
 
-weather_data = []
+# 取得城市的經緯度
+city_coords = {}
 for city in CITIES:
     url = f"https://api.openweathermap.org/data/2.5/weather?q={city['q']}&appid={API_KEY}&units=metric&lang=zh_tw"
     resp = requests.get(url)
     if resp.status_code == 200:
         data = resp.json()
-        weather_data.append({
-            "name": city["name"],
-            "temp": data["main"]["temp"],
-            "desc": data["weather"][0]["description"],
-            "icon": data["weather"][0]["icon"]
-        })
+        city_coords[city['name']] = {
+            'lat': data['coord']['lat'],
+            'lon': data['coord']['lon'],
+            'current': {
+                'temp': data['main']['temp'],
+                'desc': data['weather'][0]['description'],
+                'icon': data['weather'][0]['icon']
+            }
+        }
     else:
-        weather_data.append({
-            "name": city["name"],
-            "temp": "N/A",
-            "desc": "取得失敗",
-            "icon": ""
+        city_coords[city['name']] = {
+            'lat': None,
+            'lon': None,
+            'current': {
+                'temp': 'N/A',
+                'desc': '取得失敗',
+                'icon': ''
+            }
+        }
+
+# 取得未來兩天預報
+for city in CITIES:
+    name = city['name']
+    lat = city_coords[name]['lat']
+    lon = city_coords[name]['lon']
+    if lat is None or lon is None:
+        city_coords[name]['forecast'] = []
+        continue
+    url = f"https://api.openweathermap.org/data/2.5/forecast?lat={lat}&lon={lon}&appid={API_KEY}&units=metric&lang=zh_tw"
+    resp = requests.get(url)
+    if resp.status_code != 200:
+        city_coords[name]['forecast'] = []
+        continue
+    data = resp.json()
+    # 分析明天、後天的資料
+    today = datetime.utcnow().date()
+    forecast_days = {}
+    for entry in data['list']:
+        dt = datetime.utcfromtimestamp(entry['dt'])
+        date = dt.date()
+        if date == today:
+            continue  # 跳過今天
+        if date not in forecast_days:
+            forecast_days[date] = []
+        forecast_days[date].append(entry)
+        if len(forecast_days) >= 2:
+            break
+    # 整理每一天的最高/最低溫、天氣描述、icon
+    forecast_list = []
+    for date, entries in list(forecast_days.items())[:2]:
+        temps = [e['main']['temp'] for e in entries]
+        temp_max = max([e['main']['temp_max'] for e in entries])
+        temp_min = min([e['main']['temp_min'] for e in entries])
+        # 取出現最多次的天氣描述和icon
+        descs = [e['weather'][0]['description'] for e in entries]
+        icons = [e['weather'][0]['icon'] for e in entries]
+        desc = max(set(descs), key=descs.count)
+        icon = max(set(icons), key=icons.count)
+        forecast_list.append({
+            'date': date.strftime('%m/%d'),
+            'temp_max': round(temp_max, 1),
+            'temp_min': round(temp_min, 1),
+            'desc': desc,
+            'icon': icon
         })
+    city_coords[name]['forecast'] = forecast_list
 
 update_time = datetime.utcnow().strftime('%Y-%m-%d %H:%M UTC')
 
@@ -64,7 +118,7 @@ html = f'''<!DOCTYPE html>
         .weather-list {{
             display: flex;
             flex-direction: column;
-            gap: 1.5rem;
+            gap: 2rem;
             margin-top: 2rem;
         }}
         .weather-card {{
@@ -72,14 +126,32 @@ html = f'''<!DOCTYPE html>
             border-radius: 10px;
             padding: 1.5rem 2rem;
             display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 2rem;
-            font-size: 1.3rem;
+            flex-direction: column;
+            align-items: flex-start;
+            font-size: 1.2rem;
         }}
-        .weather-card img {{
-            width: 60px;
-            height: 60px;
+        .city-title {{
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+        }}
+        .forecast-row {{
+            display: flex;
+            gap: 2rem;
+            margin-top: 0.5rem;
+        }}
+        .forecast-block {{
+            background: rgba(255,255,255,0.15);
+            border-radius: 8px;
+            padding: 1rem 1.5rem;
+            min-width: 120px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }}
+        .forecast-block img {{
+            width: 48px;
+            height: 48px;
         }}
         .update-time {{
             margin-top: 2rem;
@@ -93,13 +165,31 @@ html = f'''<!DOCTYPE html>
         <h1>自動更新天氣網頁</h1>
         <div class="weather-list">
 '''
-for w in weather_data:
-    html += f'''            <div class="weather-card">
-                <div><b>{w['name']}</b></div>
-                <div>{w['temp']}°C</div>
-                <div>{w['desc']}</div>
-                {f'<img src="https://openweathermap.org/img/wn/{w["icon"]}@2x.png" alt="icon">' if w['icon'] else ''}
-            </div>\n'''
+for city in CITIES:
+    name = city['name']
+    c = city_coords[name]
+    html += f'''<div class="weather-card">
+        <div class="city-title">{name}</div>
+        <div class="forecast-row">
+            <div class="forecast-block">
+                <div>今日</div>
+                <div>{c['current']['temp']}°C</div>
+                <div>{c['current']['desc']}</div>
+                {f'<img src="https://openweathermap.org/img/wn/{c["current"]["icon"]}@2x.png" alt="icon">' if c['current']['icon'] else ''}
+            </div>
+'''
+    for i, f in enumerate(c['forecast']):
+        label = '明天' if i == 0 else '後天'
+        html += f'''            <div class="forecast-block">
+                <div>{label} ({f['date']})</div>
+                <div>{f['temp_max']}°C / {f['temp_min']}°C</div>
+                <div>{f['desc']}</div>
+                <img src="https://openweathermap.org/img/wn/{f['icon']}@2x.png" alt="icon">
+            </div>
+'''
+    html += '''        </div>
+    </div>
+'''
 html += f'''        </div>
         <div class="update-time">最後更新時間：{update_time}</div>
     </div>
