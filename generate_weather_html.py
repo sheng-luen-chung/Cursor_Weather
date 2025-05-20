@@ -102,9 +102,15 @@ for city in CITIES:
     lat = round(float(city_coords[name]['lat']), 4)
     lon = round(float(city_coords[name]['lon']), 4)
     today_str = datetime.utcnow().strftime('%Y-%m-%d')
-    url = f"https://api.open-meteo.com/v1/astronomy?latitude={lat}&longitude={lon}&timezone=Asia/Taipei&start_date={today_str}&end_date={today_str}"
-    resp = requests.get(url)
-    print(f"{name} moon API status: {resp.status_code}, url: {url}")
+    params = {
+        "latitude": lat,
+        "longitude": lon,
+        "timezone": "Asia/Taipei",
+        "start_date": today_str,
+        "end_date": today_str,
+    }
+    resp = requests.get("https://api.open-meteo.com/v1/astronomy", params=params)
+    print(f"{name} moon API status: {resp.status_code}, url: {resp.url}")
     if resp.status_code == 200:
         data = resp.json()
         print(f"{name} moon API data: {data}")
