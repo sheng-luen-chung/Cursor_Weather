@@ -99,8 +99,8 @@ for city in CITIES:
 # 取得今日月相
 for city in CITIES:
     name = city['name']
-    lat = city_coords[name]['lat']
-    lon = city_coords[name]['lon']
+    lat = round(float(city_coords[name]['lat']), 4)
+    lon = round(float(city_coords[name]['lon']), 4)
     today_str = datetime.utcnow().strftime('%Y-%m-%d')
     url = f"https://api.open-meteo.com/v1/astronomy?latitude={lat}&longitude={lon}&timezone=Asia/Taipei&start_date={today_str}&end_date={today_str}"
     resp = requests.get(url)
