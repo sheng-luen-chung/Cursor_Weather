@@ -4,12 +4,29 @@ from datetime import datetime, timedelta
 
 API_KEY = os.getenv('OWM_API_KEY')
 CITIES = [
-    {"name": "台北市", "q": "Taipei,tw"},
-    {"name": "San Mateo", "q": "San Mateo,us"},
-    {"name": "Chicago", "q": "Chicago,us"}
+    {"name": "台北市", "q": "Taipei,tw", "lat": 25.04, "lon": 121.53},
+    {"name": "San Mateo", "q": "San Mateo,us", "lat": 37.5630, "lon": -122.3255},
+    {"name": "Chicago", "q": "Chicago,us", "lat": 41.8781, "lon": -87.6298}
 ]
 
-# 取得城市的經緯度
+# 月相對照表
+MOON_PHASES = [
+    (0.02, "新月", "🌑"),
+    (0.23, "蛾眉月", "🌒"),
+    (0.27, "上弦月", "🌓"),
+    (0.48, "盈凸月", "🌔"),
+    (0.52, "滿月", "🌕"),
+    (0.73, "虧凸月", "🌖"),
+    (0.77, "下弦月", "🌗"),
+    (1.00, "殘月", "🌘")
+]
+def moon_phase_name(val):
+    for threshold, name, emoji in MOON_PHASES:
+        if val <= threshold:
+            return name, emoji
+    return "新月", "🌑"
+
+# 取得城市的經緯度與天氣
 city_coords = {}
 for city in CITIES:
     url = f"https://api.openweathermap.org/data/2.5/weather?q={city['q']}&appid={API_KEY}&units=metric&lang=zh_tw"
@@ -27,8 +44,8 @@ for city in CITIES:
         }
     else:
         city_coords[city['name']] = {
-            'lat': None,
-            'lon': None,
+            'lat': city['lat'],
+            'lon': city['lon'],
             'current': {
                 'temp': 'N/A',
                 'desc': '取得失敗',
@@ -50,26 +67,22 @@ for city in CITIES:
         city_coords[name]['forecast'] = []
         continue
     data = resp.json()
-    # 分析明天、後天的資料
     today = datetime.utcnow().date()
     forecast_days = {}
     for entry in data['list']:
         dt = datetime.utcfromtimestamp(entry['dt'])
         date = dt.date()
         if date == today:
-            continue  # 跳過今天
+            continue
         if date not in forecast_days:
             forecast_days[date] = []
         forecast_days[date].append(entry)
         if len(forecast_days) >= 2:
             break
-    # 整理每一天的最高/最低溫、天氣描述、icon
     forecast_list = []
     for date, entries in list(forecast_days.items())[:2]:
-        temps = [e['main']['temp'] for e in entries]
         temp_max = max([e['main']['temp_max'] for e in entries])
         temp_min = min([e['main']['temp_min'] for e in entries])
-        # 取出現最多次的天氣描述和icon
         descs = [e['weather'][0]['description'] for e in entries]
         icons = [e['weather'][0]['icon'] for e in entries]
         desc = max(set(descs), key=descs.count)
@@ -82,6 +95,21 @@ for city in CITIES:
             'icon': icon
         })
     city_coords[name]['forecast'] = forecast_list
+
+# 取得今日月相
+for city in CITIES:
+    name = city['name']
+    lat = city_coords[name]['lat']
+    lon = city_coords[name]['lon']
+    url = f"https://api.open-meteo.com/v1/forecast?latitude={lat}&longitude={lon}&daily=moon_phase&timezone=auto"
+    resp = requests.get(url)
+    if resp.status_code == 200:
+        data = resp.json()
+        moon_val = data['daily']['moon_phase'][0]
+        moon_name, moon_emoji = moon_phase_name(moon_val)
+        city_coords[name]['moon'] = {'name': moon_name, 'emoji': moon_emoji}
+    else:
+        city_coords[name]['moon'] = {'name': '取得失敗', 'emoji': ''}
 
 update_time = datetime.utcnow().strftime('%Y-%m-%d %H:%M UTC')
 
@@ -153,6 +181,14 @@ html = f'''<!DOCTYPE html>
             width: 48px;
             height: 48px;
         }}
+        .moon-phase {{
+            margin-top: 1rem;
+            font-size: 1.1rem;
+            color: #ffe082;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }}
         .update-time {{
             margin-top: 2rem;
             font-size: 1rem;
@@ -187,7 +223,8 @@ for city in CITIES:
                 <img src="https://openweathermap.org/img/wn/{f['icon']}@2x.png" alt="icon">
             </div>
 '''
-    html += '''        </div>
+    html += f'''        </div>
+        <div class="moon-phase">月相：{c['moon']['name']} {c['moon']['emoji']}</div>
     </div>
 '''
 html += f'''        </div>
