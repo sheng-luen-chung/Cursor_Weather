@@ -103,12 +103,15 @@ for city in CITIES:
     lon = city_coords[name]['lon']
     url = f"https://api.open-meteo.com/v1/forecast?latitude={lat}&longitude={lon}&daily=moon_phase&timezone=auto"
     resp = requests.get(url)
+    print(f"{name} moon API status: {resp.status_code}, url: {url}")
     if resp.status_code == 200:
         data = resp.json()
+        print(f"{name} moon API data: {data}")
         moon_val = data['daily']['moon_phase'][0]
         moon_name, moon_emoji = moon_phase_name(moon_val)
         city_coords[name]['moon'] = {'name': moon_name, 'emoji': moon_emoji}
     else:
+        print(f"{name} moon API failed!")
         city_coords[name]['moon'] = {'name': '取得失敗', 'emoji': ''}
 
 update_time = datetime.utcnow().strftime('%Y-%m-%d %H:%M UTC')
