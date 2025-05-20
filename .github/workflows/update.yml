@@ -24,7 +24,6 @@ jobs:
       - name: Generate weather HTML
         env:
           OWM_API_KEY: ${{ secrets.OWM_API_KEY }}
-          PYTHONUNBUFFERED: 1
         run: |
           python generate_weather_html.py
           
