@@ -106,32 +106,6 @@ for city in CITIES:
         })
     city_coords[name]['forecast'] = forecast_list
 
-# 取得今日月相（使用 One Call API）
-for city in CITIES:
-    name = city['name']
-    lat = round(float(city_coords[name]['lat']), 4)
-    lon = round(float(city_coords[name]['lon']), 4)
-    url = "https://api.openweathermap.org/data/2.5/onecall"
-    params = {
-        'lat': lat,
-        'lon': lon,
-        'appid': API_KEY,
-        'exclude': 'current,minutely,hourly,alerts',
-        'units': 'metric',
-        'lang': 'zh_tw'
-    }
-    resp = requests.get(url, params=params)
-    print(f"{name} moon API status: {resp.status_code}, url: {resp.url}")
-    if resp.status_code == 200:
-        data = resp.json()
-        # daily[0]['moon_phase'] 返回 0~1 之間的月相值
-        moon_val = data['daily'][0]['moon_phase']
-        moon_name, moon_emoji = moon_phase_name(moon_val)
-        city_coords[name]['moon'] = {'name': moon_name, 'emoji': moon_emoji}
-    else:
-        print(f"{name} moon API failed! {resp.text}")
-        city_coords[name]['moon'] = {'name': '取得失敗', 'emoji': ''}
-
 # 產生 HTML
 update_time = datetime.utcnow().strftime('%Y-%m-%d %H:%M UTC')
 html = f'''<!DOCTYPE html>
@@ -141,6 +115,32 @@ html = f'''<!DOCTYPE html>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>自動更新天氣網頁</title>
     ...（後略，與原本相同）...'''
+
+for city in CITIES:
+    name = city['name']
+    c = city_coords[name]
+    html += f'''<div class="weather-card">
+        <div class="city-title">{name}</div>
+        <div class="forecast-row">
+            <div class="forecast-block">
+                <div>今日</div>
+                <div>{c['current']['temp']}°C</div>
+                <div>{c['current']['desc']}</div>
+                {f'<img src="https://openweathermap.org/img/wn/{c["current"]["icon"]}@2x.png" alt="icon">' if c['current']['icon'] else ''}
+            </div>
+'''
+    for i, f in enumerate(c['forecast']):
+        label = '明天' if i == 0 else '後天'
+        html += f'''            <div class="forecast-block">
+                <div>{label} ({f['date']})</div>
+                <div>{f['temp_max']}°C / {f['temp_min']}°C</div>
+                <div>{f['desc']}</div>
+                <img src="https://openweathermap.org/img/wn/{f['icon']}@2x.png" alt="icon">
+            </div>
+'''
+    html += f'''        </div>
+    </div>
+'''
 
 with open('index.html', 'w', encoding='utf-8') as f:
     f.write(html)
