@@ -1,153 +1,150 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>自動更新天氣網頁</title>
-    <style>
-        body {
-            font-family: 'Arial', sans-serif;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-        }
-        .container {
-            text-align: center;
-            padding: 2rem;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 15px;
-            backdrop-filter: blur(10px);
-            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
-        }
-        h1 {
-            margin-bottom: 1rem;
-            font-size: 2.5rem;
-        }
-        .weather-list {
-            display: flex;
-            flex-direction: column;
-            gap: 2rem;
-            margin-top: 2rem;
-        }
-        .weather-card {
-            background: rgba(255,255,255,0.2);
-            border-radius: 10px;
-            padding: 1.5rem 2rem;
-            display: flex;
-            flex-direction: column;
-            align-items: flex-start;
-            font-size: 1.2rem;
-        }
-        .city-title {
-            font-size: 1.5rem;
-            font-weight: bold;
-            margin-bottom: 1rem;
-        }
-        .forecast-row {
-            display: flex;
-            gap: 2rem;
-            margin-top: 0.5rem;
-        }
-        .forecast-block {
-            background: rgba(255,255,255,0.15);
-            border-radius: 8px;
-            padding: 1rem 1.5rem;
-            min-width: 120px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-        .forecast-block img {
-            width: 48px;
-            height: 48px;
-        }
-        .update-time {
-            margin-top: 2rem;
-            font-size: 1rem;
-            color: #e0e0e0;
-        }
-    </style>
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>自動更新天氣網頁</title>
+<style>
+  body { font-family:'Arial',sans-serif; margin:0; padding:0;
+         display:flex; justify-content:center; align-items:center; min-height:100vh;
+         background:linear-gradient(135deg,#667eea 0%,#764ba2 100%); color:white }
+  .container { text-align:center; padding:2rem;
+                background:rgba(255,255,255,0.1); border-radius:15px; backdrop-filter:blur(10px);
+                box-shadow:0 8px 32px 0 rgba(31,38,135,0.37) }
+  h1 { font-size:2.5rem; margin-bottom:1rem }
+  .weather-list { display:flex; flex-direction:column; gap:2rem; margin-top:2rem }
+  .weather-card { background:rgba(255,255,255,0.2); border-radius:10px; padding:1.5rem 2rem;
+                   display:flex; flex-direction:column; align-items:flex-start; font-size:1.2rem }
+  .city-title { font-size:1.5rem; font-weight:bold; margin-bottom:0.5rem }
+  .hourly-row, .forecast-row { display:flex; gap:1rem; margin-top:0.5rem; flex-wrap:wrap }
+  .forecast-block { background:rgba(255,255,255,0.15); border-radius:8px;
+                     padding:1rem 1.5rem; min-width:100px; display:flex;
+                     flex-direction:column; align-items:center }
+  .forecast-block img { width:48px; height:48px }
+  .update-time { margin-top:2rem; font-size:1rem; color:#e0e0e0 }
+</style>
 </head>
 <body>
-    <div class="container">
-        <h1>自動更新天氣網頁</h1>
-        <div class="weather-list">
-        <div class="weather-card">
-            <div class="city-title">台北市</div>
-            <div class="forecast-row">
-                <div class="forecast-block">
-                    <div>今日</div>
-                    <div>27.22°C</div>
-                    <div>中雨</div>
-                    <img src="https://openweathermap.org/img/wn/10d@2x.png" />
-                </div>
-                <div class="forecast-block">
-                    <div>明天 (05/22)</div>
-                    <div>31.5°C / 26.9°C</div>
-                    <div>小雨</div>
-                    <img src="https://openweathermap.org/img/wn/10d@2x.png" alt="icon">
-                </div>
-                <div class="forecast-block">
-                    <div>後天 (05/23)</div>
-                    <div>26.8°C / 26.8°C</div>
-                    <div>陰，多雲</div>
-                    <img src="https://openweathermap.org/img/wn/04n@2x.png" alt="icon">
-                </div>
-            </div>
+  <div class="container">
+    <h1>自動更新天氣網頁</h1>
+    <div class="weather-list">
+      <div class="weather-card">
+        <div class="city-title">台北市 07:03</div>
+        <!-- 接下來 6 小時預報 -->
+        <div class="hourly-row">
+          <div class="forecast-block">
+            <div>08:00</div>
+            <div>27.2°C</div>
+            <div>多雲</div>
+            <img src="https://openweathermap.org/img/wn/04d@2x.png" alt="">
+          </div>
+          <div class="forecast-block">
+            <div>11:00</div>
+            <div>27.7°C</div>
+            <div>多雲</div>
+            <img src="https://openweathermap.org/img/wn/04d@2x.png" alt="">
+          </div>
         </div>
-        <div class="weather-card">
-            <div class="city-title">San Mateo</div>
-            <div class="forecast-row">
-                <div class="forecast-block">
-                    <div>今日</div>
-                    <div>17.24°C</div>
-                    <div>晴</div>
-                    <img src="https://openweathermap.org/img/wn/01d@2x.png" />
-                </div>
-                <div class="forecast-block">
-                    <div>明天 (05/22)</div>
-                    <div>18.1°C / 8.2°C</div>
-                    <div>晴</div>
-                    <img src="https://openweathermap.org/img/wn/01d@2x.png" alt="icon">
-                </div>
-                <div class="forecast-block">
-                    <div>後天 (05/23)</div>
-                    <div>14.6°C / 14.6°C</div>
-                    <div>晴</div>
-                    <img src="https://openweathermap.org/img/wn/01d@2x.png" alt="icon">
-                </div>
-            </div>
+        <!-- 未來兩天預報 -->
+        <div class="forecast-row">
+          <div class="forecast-block">
+            <div>今日</div>
+            <div>27.22°C</div>
+            <div>大雨</div>
+            <img src="https://openweathermap.org/img/wn/10d@2x.png" alt="">
+          </div>
+          <div class="forecast-block">
+            <div>明天 (05/22)</div>
+            <div>31.5°C / 26.9°C</div>
+            <div>小雨</div>
+            <img src="https://openweathermap.org/img/wn/10d@2x.png" alt="">
+          </div>
+          <div class="forecast-block">
+            <div>後天 (05/23)</div>
+            <div>26.8°C / 26.8°C</div>
+            <div>陰，多雲</div>
+            <img src="https://openweathermap.org/img/wn/04n@2x.png" alt="">
+          </div>
         </div>
-        <div class="weather-card">
-            <div class="city-title">Chicago</div>
-            <div class="forecast-row">
-                <div class="forecast-block">
-                    <div>今日</div>
-                    <div>12.17°C</div>
-                    <div>陰，多雲</div>
-                    <img src="https://openweathermap.org/img/wn/04d@2x.png" />
-                </div>
-                <div class="forecast-block">
-                    <div>明天 (05/22)</div>
-                    <div>10.5°C / 8.1°C</div>
-                    <div>小雨</div>
-                    <img src="https://openweathermap.org/img/wn/10d@2x.png" alt="icon">
-                </div>
-                <div class="forecast-block">
-                    <div>後天 (05/23)</div>
-                    <div>9.8°C / 9.8°C</div>
-                    <div>小雨</div>
-                    <img src="https://openweathermap.org/img/wn/10d@2x.png" alt="icon">
-                </div>
-            </div>
+      </div>
+      <div class="weather-card">
+        <div class="city-title">San Mateo 16:03</div>
+        <!-- 接下來 6 小時預報 -->
+        <div class="hourly-row">
+          <div class="forecast-block">
+            <div>17:00</div>
+            <div>15.4°C</div>
+            <div>晴</div>
+            <img src="https://openweathermap.org/img/wn/01d@2x.png" alt="">
+          </div>
+          <div class="forecast-block">
+            <div>20:00</div>
+            <div>14.7°C</div>
+            <div>多雲</div>
+            <img src="https://openweathermap.org/img/wn/03d@2x.png" alt="">
+          </div>
         </div>
+        <!-- 未來兩天預報 -->
+        <div class="forecast-row">
+          <div class="forecast-block">
+            <div>今日</div>
+            <div>15.51°C</div>
+            <div>晴</div>
+            <img src="https://openweathermap.org/img/wn/01d@2x.png" alt="">
+          </div>
+          <div class="forecast-block">
+            <div>明天 (05/21)</div>
+            <div>18.1°C / 8.2°C</div>
+            <div>晴，少雲</div>
+            <img src="https://openweathermap.org/img/wn/02n@2x.png" alt="">
+          </div>
+          <div class="forecast-block">
+            <div>後天 (05/22)</div>
+            <div>8.3°C / 8.3°C</div>
+            <div>晴，少雲</div>
+            <img src="https://openweathermap.org/img/wn/02n@2x.png" alt="">
+          </div>
         </div>
-        <div class="update-time">最後更新時間：2025-05-21 06:54 CST</div>
+      </div>
+      <div class="weather-card">
+        <div class="city-title">Chicago 18:03</div>
+        <!-- 接下來 6 小時預報 -->
+        <div class="hourly-row">
+          <div class="forecast-block">
+            <div>19:00</div>
+            <div>12°C</div>
+            <div>小雨</div>
+            <img src="https://openweathermap.org/img/wn/10d@2x.png" alt="">
+          </div>
+          <div class="forecast-block">
+            <div>22:00</div>
+            <div>12.1°C</div>
+            <div>小雨</div>
+            <img src="https://openweathermap.org/img/wn/10n@2x.png" alt="">
+          </div>
+        </div>
+        <!-- 未來兩天預報 -->
+        <div class="forecast-row">
+          <div class="forecast-block">
+            <div>今日</div>
+            <div>12.1°C</div>
+            <div>陰，多雲</div>
+            <img src="https://openweathermap.org/img/wn/04d@2x.png" alt="">
+          </div>
+          <div class="forecast-block">
+            <div>明天 (05/21)</div>
+            <div>11.5°C / 8.7°C</div>
+            <div>小雨</div>
+            <img src="https://openweathermap.org/img/wn/10d@2x.png" alt="">
+          </div>
+          <div class="forecast-block">
+            <div>後天 (05/22)</div>
+            <div>8.1°C / 8.1°C</div>
+            <div>小雨</div>
+            <img src="https://openweathermap.org/img/wn/10n@2x.png" alt="">
+          </div>
+        </div>
+      </div>
     </div>
+    <div class="update-time">最後更新時間：2025-05-21 07:03 （台北時間）</div>
+  </div>
 </body>
 </html>
