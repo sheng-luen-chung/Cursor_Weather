@@ -1,6 +1,6 @@
 import requests
 import os
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 API_KEY = os.getenv('OWM_API_KEY')
 CITIES = [
@@ -51,7 +51,7 @@ for city in CITIES:
         continue
     data = resp.json()
     # 分析明天、後天的資料
-    today = datetime.utcnow().date()
+    today = datetime.now(timezone.utc).date()
     forecast_days = {}
     for entry in data['list']:
         dt = datetime.utcfromtimestamp(entry['dt'])
@@ -83,7 +83,7 @@ for city in CITIES:
         })
     city_coords[name]['forecast'] = forecast_list
 
-update_time = datetime.utcnow().strftime('%Y-%m-%d %H:%M UTC')
+update_time = datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M UTC')
 
 html = f'''<!DOCTYPE html>
 <html lang="zh-TW">
