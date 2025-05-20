@@ -101,7 +101,7 @@ for city in CITIES:
     name = city['name']
     lat = city_coords[name]['lat']
     lon = city_coords[name]['lon']
-    url = f"https://api.open-meteo.com/v1/forecast?latitude={lat}&longitude={lon}&daily=moon_phase&timezone=Asia/Taipei"
+    url = f"https://api.open-meteo.com/v1/astronomy?latitude={lat}&longitude={lon}&timezone=Asia/Taipei"
     resp = requests.get(url)
     print(f"{name} moon API status: {resp.status_code}, url: {url}")
     if resp.status_code == 200:
