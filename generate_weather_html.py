@@ -101,13 +101,14 @@ for city in CITIES:
     name = city['name']
     lat = city_coords[name]['lat']
     lon = city_coords[name]['lon']
-    url = f"https://api.open-meteo.com/v1/astronomy?latitude={lat}&longitude={lon}&timezone=Asia/Taipei"
+    today_str = datetime.utcnow().strftime('%Y-%m-%d')
+    url = f"https://api.open-meteo.com/v1/astronomy?latitude={lat}&longitude={lon}&timezone=Asia/Taipei&start_date={today_str}&end_date={today_str}"
     resp = requests.get(url)
     print(f"{name} moon API status: {resp.status_code}, url: {url}")
     if resp.status_code == 200:
         data = resp.json()
         print(f"{name} moon API data: {data}")
-        moon_val = data['daily']['moon_phase'][0]
+        moon_val = data['astronomy']['moon_phase'][0]
         moon_name, moon_emoji = moon_phase_name(moon_val)
         city_coords[name]['moon'] = {'name': moon_name, 'emoji': moon_emoji}
     else:
